@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 const API = "https://shaunte-eupotamic-poshly.ngrok-free.dev";
 
+const HEADERS = { "ngrok-skip-browser-warning": "true" };
 // ── helpers ───────────────────────────────────────────────────────────────────
 const SEVERITY_CONFIG = {
   critical: { color: "#FF3B3B", bg: "#FF3B3B18", label: "Critical", order: 0 },
@@ -238,7 +239,7 @@ function HistoryTab({ onLoad }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API}/api/scans`)
+    fetch(`${API}/api/scans`, { headers: HEADERS })
       .then(r => r.json())
       .then(data => { setHistory(data); setLoading(false); })
       .catch(() => setLoading(false));
@@ -281,7 +282,7 @@ export default function App() {
 
   // Check API health on mount
   useEffect(() => {
-    fetch(`${API}/`)
+    fetch(`${API}/api/health`, { headers: HEADERS })
       .then(r => r.json())
       .then(() => setApiOnline(true))
       .catch(() => setApiOnline(false));
@@ -295,10 +296,10 @@ export default function App() {
     setSelectedDevice(null);
 
     try {
-      const res = await fetch(`${API}/api/scan/start`, { method: "POST" });
+      const res = await fetch(`${API}/api/scan/start`, { method: "POST", headers: HEADERS });
       const { scan_id } = await res.json();
       pollRef.current = setInterval(async () => {
-        const s = await fetch(`${API}/api/scan/status/${scan_id}`).then(r => r.json());
+        const s = await fetch(`${API}/api/scan/status/${scan_id}`, { headers: HEADERS }).then(r => r.json());
         setScanStage(s.stage || "");
         setScanProgress(s.progress || 0);
         if (s.status === "complete") {
@@ -320,7 +321,7 @@ export default function App() {
   };
 
   const loadHistoryScan = async (scan_id) => {
-    const data = await fetch(`${API}/api/scans/${scan_id}`).then(r => r.json());
+    const data = await fetch(`${API}/api/scans/${scan_id}`, { headers: HEADERS }).then(r => r.json());
     setResults(data);
     setSelectedDevice(data.devices?.[0] || null);
     setPhase("results");
