@@ -281,8 +281,8 @@ export default function App() {
   const pollRef = useRef(null);
 
   // Check API health on mount
-  useEffect(() => {
-    fetch(`${API}/api/health`, { headers: HEADERS })
+ useEffect(() => {
+    fetch(`${API}/`, { headers: { "ngrok-skip-browser-warning": "true" } })
       .then(r => r.json())
       .then(() => setApiOnline(true))
       .catch(() => setApiOnline(false));
