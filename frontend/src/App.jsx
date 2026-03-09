@@ -1,9 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const API = "https://ranking-knife-calculators-province.trycloudflare.com";
 
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 const SEVERITY_CONFIG = {
   critical: { color: "#FF3B3B", bg: "#FF3B3B18", label: "Critical", order: 0 },
   high:     { color: "#FF8C42", bg: "#FF8C4218", label: "High",     order: 1 },
@@ -33,11 +31,9 @@ function VulnBadge({ severity }) {
   );
 }
 
-// ── Scanning animation ────────────────────────────────────────────────────────
 function ScanningOverlay({ stage, progress }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: 480, gap: 32 }}>
-      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}} @keyframes spinR{from{transform:rotate(360deg)}to{transform:rotate(0)}}`}</style>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "70vh", gap: 32 }}>
       <div style={{ position: "relative", width: 120, height: 120 }}>
         <svg width="120" height="120" style={{ position: "absolute", animation: "spin 3s linear infinite" }}>
           <circle cx="60" cy="60" r="52" fill="none" stroke="#0ff3" strokeWidth="1" strokeDasharray="4 8"/>
@@ -58,7 +54,6 @@ function ScanningOverlay({ stage, progress }) {
   );
 }
 
-// ── Device card ───────────────────────────────────────────────────────────────
 function DeviceCard({ device, selected, onClick }) {
   const cfg = SEVERITY_CONFIG[device.status] || SEVERITY_CONFIG.safe;
   return (
@@ -87,7 +82,6 @@ function DeviceCard({ device, selected, onClick }) {
   );
 }
 
-// ── Device detail panel ───────────────────────────────────────────────────────
 function DeviceDetail({ device }) {
   const [open, setOpen] = useState(null);
   const cfg = SEVERITY_CONFIG[device.status] || SEVERITY_CONFIG.safe;
@@ -120,7 +114,6 @@ function DeviceDetail({ device }) {
             </div>
           ))}
         </div>
-        {/* Port services */}
         {device.ports?.length > 0 && (
           <div style={{ marginTop: 8 }}>
             <div style={{ color: "#ffffff30", fontSize: 10, fontFamily: "monospace", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>Services Detected</div>
@@ -183,7 +176,6 @@ function DeviceDetail({ device }) {
   );
 }
 
-// ── Risk report tab ───────────────────────────────────────────────────────────
 function RiskReport({ results }) {
   const { devices = [], severity_counts = {}, security_score = 0, total_vulnerabilities = 0 } = results;
   const counts = { critical: 0, high: 0, medium: 0, low: 0, ...severity_counts };
@@ -213,10 +205,9 @@ function RiskReport({ results }) {
           );
         })}
       </div>
-
       {allVulns.length > 0 && <>
         <div style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 }}>All Findings</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {allVulns.sort((a, b) => (SEVERITY_CONFIG[a.severity]?.order ?? 9) - (SEVERITY_CONFIG[b.severity]?.order ?? 9)).map((v, i) => (
             <div key={i} style={{ background: "#ffffff06", border: "1px solid #ffffff0d", borderRadius: 8, padding: "10px 14px", display: "flex", alignItems: "center", gap: 12 }}>
               <VulnBadge severity={v.severity} />
@@ -233,60 +224,129 @@ function RiskReport({ results }) {
   );
 }
 
-// ── History tab ───────────────────────────────────────────────────────────────
-function HistoryTab({ onLoad }) {
+function HistoryTab({ onLoad, refreshKey }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
     fetch(`${API}/api/scans`)
       .then(r => r.json())
       .then(data => { setHistory(data); setLoading(false); })
       .catch(() => setLoading(false));
-  }, []);
+  }, [refreshKey]);
+
+  const handleDelete = async (scan_id) => {
+    setDeleting(scan_id);
+    try {
+      await fetch(`${API}/api/scans/${scan_id}`, { method: "DELETE" });
+      setHistory(prev => prev.filter(s => s.scan_id !== scan_id));
+    } catch (e) {
+      alert("Failed to delete scan.");
+    }
+    setDeleting(null);
+    setConfirmDelete(null);
+  };
+
+  const handleDeleteAll = async () => {
+    setDeleting("all");
+    try {
+      await fetch(`${API}/api/scans`, { method: "DELETE" });
+      setHistory([]);
+    } catch (e) {
+      alert("Failed to delete all scans.");
+    }
+    setDeleting(null);
+    setConfirmDelete(null);
+  };
 
   if (loading) return <div style={{ color: "#ffffff40", fontFamily: "monospace", textAlign: "center", paddingTop: 60 }}>Loading scan history...</div>;
   if (!history.length) return <div style={{ color: "#ffffff30", fontFamily: "monospace", textAlign: "center", paddingTop: 60 }}>No previous scans found.</div>;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {history.map(s => {
-        const scoreColor = s.score >= 80 ? "#06D6A0" : s.score >= 50 ? "#FFD166" : "#FF3B3B";
-        return (
-          <div key={s.scan_id} onClick={() => onLoad(s.scan_id)} style={{ background: "#ffffff06", border: "1px solid #ffffff10", borderRadius: 10, padding: "14px 18px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "background 0.2s" }}>
-            <div>
-              <div style={{ color: "#ffffffcc", fontSize: 13, fontFamily: "monospace", marginBottom: 4 }}>{s.target}</div>
-              <div style={{ color: "#ffffff40", fontSize: 11, fontFamily: "monospace" }}>{new Date(s.scanned_at).toLocaleString()} · {s.device_count} devices · {s.vuln_count} vulns</div>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: scoreColor, fontFamily: "monospace" }}>{s.score}</div>
-              <div style={{ color: "#ffffff30", fontSize: 10, fontFamily: "monospace" }}>score</div>
-            </div>
+    <div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+        {confirmDelete === "all" ? (
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <span style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace" }}>Delete all scans?</span>
+            <button onClick={handleDeleteAll} style={{ background: "#FF3B3B22", border: "1px solid #FF3B3B44", color: "#FF3B3B", borderRadius: 6, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>
+              {deleting === "all" ? "Deleting..." : "Confirm"}
+            </button>
+            <button onClick={() => setConfirmDelete(null)} style={{ background: "#ffffff08", border: "1px solid #ffffff15", color: "#ffffff60", borderRadius: 6, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>
+              Cancel
+            </button>
           </div>
-        );
-      })}
+        ) : (
+          <button onClick={() => setConfirmDelete("all")} style={{ background: "#FF3B3B12", border: "1px solid #FF3B3B33", color: "#FF3B3B88", borderRadius: 6, padding: "5px 14px", fontSize: 11, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>
+            ✕ Clear All History
+          </button>
+        )}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {history.map(s => {
+          const scoreColor = s.score >= 80 ? "#06D6A0" : s.score >= 50 ? "#FFD166" : "#FF3B3B";
+          const isConfirming = confirmDelete === s.scan_id;
+          return (
+            <div key={s.scan_id} style={{ background: "#ffffff06", border: "1px solid #ffffff10", borderRadius: 10, padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div onClick={() => onLoad(s.scan_id)} style={{ flex: 1, cursor: "pointer" }}>
+                <div style={{ color: "#ffffffcc", fontSize: 13, fontFamily: "monospace", marginBottom: 4 }}>{s.target}</div>
+                <div style={{ color: "#ffffff40", fontSize: 11, fontFamily: "monospace" }}>{new Date(s.scanned_at).toLocaleString()} · {s.device_count} devices · {s.vuln_count} vulns</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: scoreColor, fontFamily: "monospace" }}>{s.score}</div>
+                  <div style={{ color: "#ffffff30", fontSize: 10, fontFamily: "monospace" }}>score</div>
+                </div>
+                {isConfirming ? (
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button onClick={() => handleDelete(s.scan_id)} style={{ background: "#FF3B3B22", border: "1px solid #FF3B3B44", color: "#FF3B3B", borderRadius: 6, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>
+                      {deleting === s.scan_id ? "..." : "Delete"}
+                    </button>
+                    <button onClick={() => setConfirmDelete(null)} style={{ background: "#ffffff08", border: "1px solid #ffffff15", color: "#ffffff50", borderRadius: 6, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={(e) => { e.stopPropagation(); setConfirmDelete(s.scan_id); }} style={{ background: "transparent", border: "1px solid #ffffff15", color: "#ffffff30", borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-// ── Root App ──────────────────────────────────────────────────────────────────
 export default function App() {
-  const [phase, setPhase]           = useState("idle");   // idle|scanning|results
-  const [scanStage, setScanStage]   = useState("");
+  const [phase, setPhase]               = useState("idle");
+  const [scanStage, setScanStage]       = useState("");
   const [scanProgress, setScanProgress] = useState(0);
-  const [results, setResults]       = useState(null);
+  const [results, setResults]           = useState(null);
   const [selectedDevice, setSelectedDevice] = useState(null);
-  const [activeTab, setActiveTab]   = useState("devices");
-  const [apiOnline, setApiOnline]   = useState(null);
+  const [activeTab, setActiveTab]       = useState("devices");
+  const [apiOnline, setApiOnline]       = useState(null);
+  const [historyKey, setHistoryKey]     = useState(0);
   const pollRef = useRef(null);
 
-  // Check API health on mount
- useEffect(() => {
+  useEffect(() => {
     fetch(`${API}/`)
       .then(r => r.json())
       .then(() => setApiOnline(true))
       .catch(() => setApiOnline(false));
   }, []);
+
+  const goHome = () => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    setPhase("idle");
+    setResults(null);
+    setSelectedDevice(null);
+    setHistoryKey(k => k + 1);
+  };
 
   const startScan = async () => {
     setPhase("scanning");
@@ -294,7 +354,6 @@ export default function App() {
     setScanStage("Initializing...");
     setResults(null);
     setSelectedDevice(null);
-
     try {
       const res = await fetch(`${API}/api/scan/start`, { method: "POST" });
       const { scan_id } = await res.json();
@@ -308,6 +367,7 @@ export default function App() {
           setSelectedDevice(s.results.devices?.[0] || null);
           setPhase("results");
           setActiveTab("devices");
+          setHistoryKey(k => k + 1);
         } else if (s.status === "error") {
           clearInterval(pollRef.current);
           setPhase("idle");
@@ -332,35 +392,41 @@ export default function App() {
   const highCount     = results?.severity_counts?.high     || 0;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#080c12", color: "#fff", fontFamily: "monospace", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", width: "100%", background: "#080c12", color: "#fff", fontFamily: "monospace", position: "relative" }}>
       <style>{`
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
         @keyframes spinR{from{transform:rotate(360deg)}to{transform:rotate(0)}}
         ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:#ffffff20;border-radius:2px}
-        *{box-sizing:border-box}
+        *{box-sizing:border-box} html,body{margin:0;padding:0;width:100%;overflow-x:hidden}
       `}</style>
 
-      {/* BG */}
-      <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(#00ffcc04 1px,transparent 1px),linear-gradient(90deg,#00ffcc04 1px,transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none" }} />
-      <div style={{ position: "fixed", inset: 0, background: "radial-gradient(ellipse at 20% 20%,#00ffcc08,transparent 60%),radial-gradient(ellipse at 80% 80%,#0044ff06,transparent 60%)", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(#00ffcc04 1px,transparent 1px),linear-gradient(90deg,#00ffcc04 1px,transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", inset: 0, background: "radial-gradient(ellipse at 20% 20%,#00ffcc08,transparent 60%),radial-gradient(ellipse at 80% 80%,#0044ff06,transparent 60%)", pointerEvents: "none", zIndex: 0 }} />
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "24px 20px" }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "24px 32px" }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2 }}>
-              <span style={{ fontSize: 20, color: "#00ffcc" }}>⊛</span>
-              <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: 3, color: "#fff", textTransform: "uppercase" }}>IoT Scanner</span>
-              <span style={{ background: "#00ffcc15", border: "1px solid #00ffcc30", borderRadius: 4, padding: "1px 8px", fontSize: 9, color: "#00ffcc", letterSpacing: 2 }}>v1.0</span>
-              {apiOnline !== null && (
-                <span style={{ background: apiOnline ? "#06D6A015" : "#FF3B3B15", border: `1px solid ${apiOnline ? "#06D6A040" : "#FF3B3B40"}`, borderRadius: 4, padding: "1px 8px", fontSize: 9, color: apiOnline ? "#06D6A0" : "#FF3B3B", letterSpacing: 2 }}>
-                  API {apiOnline ? "ONLINE" : "OFFLINE"}
-                </span>
-              )}
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            {phase !== "idle" && (
+              <button onClick={goHome} style={{ background: "#ffffff08", border: "1px solid #ffffff18", color: "#ffffff70", borderRadius: 8, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1, transition: "all 0.2s" }}>
+                ← Home
+              </button>
+            )}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2 }}>
+                <span style={{ fontSize: 20, color: "#00ffcc" }}>⊛</span>
+                <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: 3, color: "#fff", textTransform: "uppercase" }}>IoT Scanner</span>
+                <span style={{ background: "#00ffcc15", border: "1px solid #00ffcc30", borderRadius: 4, padding: "1px 8px", fontSize: 9, color: "#00ffcc", letterSpacing: 2 }}>v1.0</span>
+                {apiOnline !== null && (
+                  <span style={{ background: apiOnline ? "#06D6A015" : "#FF3B3B15", border: `1px solid ${apiOnline ? "#06D6A040" : "#FF3B3B40"}`, borderRadius: 4, padding: "1px 8px", fontSize: 9, color: apiOnline ? "#06D6A0" : "#FF3B3B", letterSpacing: 2 }}>
+                    API {apiOnline ? "ONLINE" : "OFFLINE"}
+                  </span>
+                )}
+              </div>
+              <div style={{ color: "#ffffff30", fontSize: 11, letterSpacing: 1 }}>Smart Home Vulnerability Assessment · 192.168.100.0/24</div>
             </div>
-            <div style={{ color: "#ffffff30", fontSize: 11, letterSpacing: 1 }}>Smart Home Vulnerability Assessment · 192.168.1.0/24</div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {phase === "results" && criticalCount + highCount > 0 && (
@@ -378,10 +444,10 @@ export default function App() {
           </div>
         </div>
 
-        {/* Phases */}
+        {/* IDLE */}
         {phase === "idle" && (
           <div style={{ animation: "fadeIn 0.4s ease" }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 300, gap: 20, marginBottom: 32 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 260, gap: 20, marginBottom: 32 }}>
               <div style={{ width: 90, height: 90, border: "1px solid #00ffcc22", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, color: "#00ffcc33" }}>⊛</div>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: 20, fontWeight: 700, color: "#ffffff50", marginBottom: 6, letterSpacing: 2 }}>NETWORK IDLE</div>
@@ -389,15 +455,16 @@ export default function App() {
               </div>
             </div>
             <div style={{ color: "#ffffff50", fontSize: 11, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Previous Scans</div>
-            <HistoryTab onLoad={loadHistoryScan} />
+            <HistoryTab onLoad={loadHistoryScan} refreshKey={historyKey} />
           </div>
         )}
 
+        {/* SCANNING */}
         {phase === "scanning" && <ScanningOverlay stage={scanStage} progress={scanProgress} />}
 
+        {/* RESULTS */}
         {phase === "results" && results && (
           <div style={{ animation: "fadeIn 0.4s ease" }}>
-            {/* Tabs */}
             <div style={{ display: "flex", gap: 4, marginBottom: 18 }}>
               {[["devices", `⊞  Devices (${results.devices_found})`], ["report", "≡  Risk Report"], ["history", "⊕  History"]].map(([tab, label]) => (
                 <button key={tab} onClick={() => setActiveTab(tab)} style={{ background: activeTab === tab ? "#ffffff0f" : "transparent", border: `1px solid ${activeTab === tab ? "#ffffff22" : "transparent"}`, borderBottom: activeTab === tab ? "1px solid #00ffcc66" : "1px solid transparent", color: activeTab === tab ? "#fff" : "#ffffff40", borderRadius: "8px 8px 0 0", padding: "8px 18px", fontSize: 12, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1, transition: "all 0.2s" }}>
@@ -413,7 +480,7 @@ export default function App() {
             </div>
 
             {activeTab === "devices" && (
-              <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 16, height: 560 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 16, height: "calc(100vh - 200px)" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, overflowY: "auto" }}>
                   {results.devices.map((d, i) => (
                     <DeviceCard key={i} device={d} selected={selectedDevice?.ip === d.ip} onClick={() => setSelectedDevice(d)} />
@@ -428,14 +495,14 @@ export default function App() {
             )}
 
             {activeTab === "report" && (
-              <div style={{ background: "#ffffff04", border: "1px solid #ffffff0d", borderRadius: 14, padding: 20, height: 560 }}>
+              <div style={{ background: "#ffffff04", border: "1px solid #ffffff0d", borderRadius: 14, padding: 20, height: "calc(100vh - 200px)", overflowY: "auto" }}>
                 <RiskReport results={results} />
               </div>
             )}
 
             {activeTab === "history" && (
-              <div style={{ background: "#ffffff04", border: "1px solid #ffffff0d", borderRadius: 14, padding: 20, height: 560, overflowY: "auto" }}>
-                <HistoryTab onLoad={loadHistoryScan} />
+              <div style={{ background: "#ffffff04", border: "1px solid #ffffff0d", borderRadius: 14, padding: 20, height: "calc(100vh - 200px)", overflowY: "auto" }}>
+                <HistoryTab onLoad={loadHistoryScan} refreshKey={historyKey} />
               </div>
             )}
           </div>
