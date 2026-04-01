@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const API = "https://reservation-suffering-dressing-jan.trycloudflare.com";
+const API = "https://ranking-knife-calculators-province.trycloudflare.com";
 
 const SEVERITY_CONFIG = {
   critical: { color: "#FF3B3B", bg: "#FF3B3B18", label: "Critical", order: 0 },
@@ -85,7 +85,6 @@ function DeviceCard({ device, selected, onClick }) {
 function DeviceDetail({ device }) {
   const [open, setOpen] = useState(null);
   const cfg = SEVERITY_CONFIG[device.status] || SEVERITY_CONFIG.safe;
-
   return (
     <div style={{ height: "100%", overflowY: "auto" }}>
       <div style={{ background: "#ffffff06", border: "1px solid #ffffff12", borderRadius: 12, padding: 18, marginBottom: 14 }}>
@@ -102,12 +101,7 @@ function DeviceDetail({ device }) {
           <VulnBadge severity={device.status} />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          {[
-            ["IP Address", device.ip],
-            ["Protocol",   device.protocol],
-            ["Firmware",   device.firmware],
-            ["Open Ports", device.ports?.map(p => p.port).join(", ") || "none"],
-          ].map(([k, v]) => (
+          {[["IP Address", device.ip], ["Protocol", device.protocol], ["Firmware", device.firmware], ["Open Ports", device.ports?.map(p => p.port).join(", ") || "none"]].map(([k, v]) => (
             <div key={k} style={{ background: "#ffffff05", borderRadius: 8, padding: "8px 12px" }}>
               <div style={{ color: "#ffffff40", fontSize: 10, fontFamily: "monospace", letterSpacing: 1, marginBottom: 2, textTransform: "uppercase" }}>{k}</div>
               <div style={{ color: "#ffffffcc", fontSize: 12, fontFamily: "monospace" }}>{v}</div>
@@ -119,18 +113,13 @@ function DeviceDetail({ device }) {
             <div style={{ color: "#ffffff30", fontSize: 10, fontFamily: "monospace", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>Services Detected</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
               {device.ports.map(p => (
-                <span key={p.port} style={{ background: "#ffffff08", border: "1px solid #ffffff15", borderRadius: 4, padding: "2px 8px", fontSize: 10, color: "#ffffff70", fontFamily: "monospace" }}>
-                  {p.port}/{p.service}
-                </span>
+                <span key={p.port} style={{ background: "#ffffff08", border: "1px solid #ffffff15", borderRadius: 4, padding: "2px 8px", fontSize: 10, color: "#ffffff70", fontFamily: "monospace" }}>{p.port}/{p.service}</span>
               ))}
             </div>
           </div>
         )}
       </div>
-
-      <div style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>
-        Vulnerabilities ({device.vulnerabilities?.length || 0})
-      </div>
+      <div style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>Vulnerabilities ({device.vulnerabilities?.length || 0})</div>
       {!device.vulnerabilities?.length ? (
         <div style={{ background: "#06D6A010", border: "1px solid #06D6A030", borderRadius: 12, padding: 20, textAlign: "center" }}>
           <div style={{ fontSize: 22, marginBottom: 6 }}>✓</div>
@@ -155,11 +144,7 @@ function DeviceDetail({ device }) {
                 </div>
                 {isOpen && (
                   <div style={{ borderTop: "1px solid #ffffff0a", paddingTop: 12 }}>
-                    {v.cvss && v.cvss !== "N/A" && (
-                      <div style={{ marginBottom: 8 }}>
-                        <span style={{ background: "#ffffff08", border: "1px solid #ffffff15", borderRadius: 4, padding: "2px 8px", fontSize: 10, color: "#ffffff60", fontFamily: "monospace" }}>CVSS {v.cvss}</span>
-                      </div>
-                    )}
+                    {v.cvss && v.cvss !== "N/A" && <div style={{ marginBottom: 8 }}><span style={{ background: "#ffffff08", border: "1px solid #ffffff15", borderRadius: 4, padding: "2px 8px", fontSize: 10, color: "#ffffff60", fontFamily: "monospace" }}>CVSS {v.cvss}</span></div>}
                     <div style={{ color: "#ffffff70", fontSize: 12, fontFamily: "monospace", lineHeight: 1.7, marginBottom: 12 }}>{v.desc}</div>
                     <div style={{ background: "#06D6A010", border: "1px solid #06D6A030", borderRadius: 8, padding: 12 }}>
                       <div style={{ color: "#06D6A0", fontSize: 10, fontFamily: "monospace", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>↳ Remediation</div>
@@ -181,7 +166,6 @@ function RiskReport({ results }) {
   const counts = { critical: 0, high: 0, medium: 0, low: 0, ...severity_counts };
   const scoreColor = security_score >= 80 ? "#06D6A0" : security_score >= 50 ? "#FFD166" : "#FF3B3B";
   const allVulns = devices.flatMap(d => (d.vulnerabilities || []).map(v => ({ ...v, device: d.type, ip: d.ip })));
-
   return (
     <div style={{ height: "100%", overflowY: "auto" }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
@@ -211,10 +195,7 @@ function RiskReport({ results }) {
           {allVulns.sort((a, b) => (SEVERITY_CONFIG[a.severity]?.order ?? 9) - (SEVERITY_CONFIG[b.severity]?.order ?? 9)).map((v, i) => (
             <div key={i} style={{ background: "#ffffff06", border: "1px solid #ffffff0d", borderRadius: 8, padding: "10px 14px", display: "flex", alignItems: "center", gap: 12 }}>
               <VulnBadge severity={v.severity} />
-              <div style={{ flex: 1 }}>
-                <span style={{ color: "#ffffffcc", fontSize: 12, fontFamily: "monospace" }}>{v.name}</span>
-                <span style={{ color: "#ffffff30", fontSize: 11, fontFamily: "monospace" }}> — {v.device}</span>
-              </div>
+              <div style={{ flex: 1 }}><span style={{ color: "#ffffffcc", fontSize: 12, fontFamily: "monospace" }}>{v.name}</span><span style={{ color: "#ffffff30", fontSize: 11, fontFamily: "monospace" }}> — {v.device}</span></div>
               <span style={{ color: "#ffffff30", fontSize: 10, fontFamily: "monospace" }}>{v.ip}</span>
             </div>
           ))}
@@ -232,10 +213,7 @@ function HistoryTab({ onLoad, refreshKey }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${API}/api/scans`)
-      .then(r => r.json())
-      .then(data => { setHistory(data); setLoading(false); })
-      .catch(() => setLoading(false));
+    fetch(`${API}/api/scans`).then(r => r.json()).then(data => { setHistory(data); setLoading(false); }).catch(() => setLoading(false));
   }, [refreshKey]);
 
   const handleDelete = async (scan_id) => {
@@ -243,11 +221,8 @@ function HistoryTab({ onLoad, refreshKey }) {
     try {
       await fetch(`${API}/api/scans/${scan_id}`, { method: "DELETE" });
       setHistory(prev => prev.filter(s => s.scan_id !== scan_id));
-    } catch (e) {
-      alert("Failed to delete scan.");
-    }
-    setDeleting(null);
-    setConfirmDelete(null);
+    } catch { alert("Failed to delete scan."); }
+    setDeleting(null); setConfirmDelete(null);
   };
 
   const handleDeleteAll = async () => {
@@ -255,11 +230,8 @@ function HistoryTab({ onLoad, refreshKey }) {
     try {
       await fetch(`${API}/api/scans`, { method: "DELETE" });
       setHistory([]);
-    } catch (e) {
-      alert("Failed to delete all scans.");
-    }
-    setDeleting(null);
-    setConfirmDelete(null);
+    } catch { alert("Failed to delete all scans."); }
+    setDeleting(null); setConfirmDelete(null);
   };
 
   if (loading) return <div style={{ color: "#ffffff40", fontFamily: "monospace", textAlign: "center", paddingTop: 60 }}>Loading scan history...</div>;
@@ -271,17 +243,11 @@ function HistoryTab({ onLoad, refreshKey }) {
         {confirmDelete === "all" ? (
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <span style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace" }}>Delete all scans?</span>
-            <button onClick={handleDeleteAll} style={{ background: "#FF3B3B22", border: "1px solid #FF3B3B44", color: "#FF3B3B", borderRadius: 6, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>
-              {deleting === "all" ? "Deleting..." : "Confirm"}
-            </button>
-            <button onClick={() => setConfirmDelete(null)} style={{ background: "#ffffff08", border: "1px solid #ffffff15", color: "#ffffff60", borderRadius: 6, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>
-              Cancel
-            </button>
+            <button onClick={handleDeleteAll} style={{ background: "#FF3B3B22", border: "1px solid #FF3B3B44", color: "#FF3B3B", borderRadius: 6, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>{deleting === "all" ? "Deleting..." : "Confirm"}</button>
+            <button onClick={() => setConfirmDelete(null)} style={{ background: "#ffffff08", border: "1px solid #ffffff15", color: "#ffffff60", borderRadius: 6, padding: "4px 12px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>Cancel</button>
           </div>
         ) : (
-          <button onClick={() => setConfirmDelete("all")} style={{ background: "#FF3B3B12", border: "1px solid #FF3B3B33", color: "#FF3B3B88", borderRadius: 6, padding: "5px 14px", fontSize: 11, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>
-            ✕ Clear All History
-          </button>
+          <button onClick={() => setConfirmDelete("all")} style={{ background: "#FF3B3B12", border: "1px solid #FF3B3B33", color: "#FF3B3B88", borderRadius: 6, padding: "5px 14px", fontSize: 11, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>✕ Clear All History</button>
         )}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -301,17 +267,11 @@ function HistoryTab({ onLoad, refreshKey }) {
                 </div>
                 {isConfirming ? (
                   <div style={{ display: "flex", gap: 6 }}>
-                    <button onClick={() => handleDelete(s.scan_id)} style={{ background: "#FF3B3B22", border: "1px solid #FF3B3B44", color: "#FF3B3B", borderRadius: 6, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>
-                      {deleting === s.scan_id ? "..." : "Delete"}
-                    </button>
-                    <button onClick={() => setConfirmDelete(null)} style={{ background: "#ffffff08", border: "1px solid #ffffff15", color: "#ffffff50", borderRadius: 6, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>
-                      Cancel
-                    </button>
+                    <button onClick={() => handleDelete(s.scan_id)} style={{ background: "#FF3B3B22", border: "1px solid #FF3B3B44", color: "#FF3B3B", borderRadius: 6, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{deleting === s.scan_id ? "..." : "Delete"}</button>
+                    <button onClick={() => setConfirmDelete(null)} style={{ background: "#ffffff08", border: "1px solid #ffffff15", color: "#ffffff50", borderRadius: 6, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>Cancel</button>
                   </div>
                 ) : (
-                  <button onClick={(e) => { e.stopPropagation(); setConfirmDelete(s.scan_id); }} style={{ background: "transparent", border: "1px solid #ffffff15", color: "#ffffff30", borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>
-                    ✕
-                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); setConfirmDelete(s.scan_id); }} style={{ background: "transparent", border: "1px solid #ffffff15", color: "#ffffff30", borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>✕</button>
                 )}
               </div>
             </div>
@@ -322,6 +282,263 @@ function HistoryTab({ onLoad, refreshKey }) {
   );
 }
 
+// ── DATABASE TAB ──────────────────────────────────────────────────────────────
+function DatabaseTab() {
+  const [section, setSection] = useState("overview");
+  const [stats, setStats]     = useState(null);
+  const [devices, setDevices] = useState([]);
+  const [vulns, setVulns]     = useState([]);
+  const [settings, setSettings] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [editSetting, setEditSetting] = useState(null);
+  const [editValue, setEditValue]     = useState("");
+  const [severityFilter, setSeverityFilter] = useState("");
+  const [deletingDevice, setDeletingDevice] = useState(null);
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      fetch(`${API}/api/stats`).then(r => r.json()),
+      fetch(`${API}/api/devices`).then(r => r.json()),
+      fetch(`${API}/api/vulnerabilities?limit=200`).then(r => r.json()),
+      fetch(`${API}/api/settings`).then(r => r.json()),
+    ]).then(([s, d, v, st]) => {
+      setStats(s); setDevices(d); setVulns(v); setSettings(st); setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  const filteredVulns = severityFilter ? vulns.filter(v => v.severity === severityFilter) : vulns;
+
+  const saveSetting = async (key) => {
+    await fetch(`${API}/api/settings/${key}?value=${encodeURIComponent(editValue)}`, { method: "PUT" });
+    setSettings(prev => ({ ...prev, [key]: editValue }));
+    setEditSetting(null);
+  };
+
+  const handleDeleteDevice = async (mac) => {
+    await fetch(`${API}/api/devices/${encodeURIComponent(mac)}`, { method: "DELETE" });
+    setDevices(prev => prev.filter(d => d.mac !== mac));
+    setDeletingDevice(null);
+  };
+
+  const sectionBtn = (key, label) => (
+    <button key={key} onClick={() => setSection(key)} style={{ background: section === key ? "#00ffcc18" : "transparent", border: `1px solid ${section === key ? "#00ffcc44" : "#ffffff15"}`, color: section === key ? "#00ffcc" : "#ffffff50", borderRadius: 8, padding: "7px 16px", fontSize: 11, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1, transition: "all 0.2s" }}>
+      {label}
+    </button>
+  );
+
+  if (loading) return <div style={{ color: "#ffffff40", fontFamily: "monospace", textAlign: "center", paddingTop: 80 }}>Loading database...</div>;
+
+  return (
+    <div style={{ height: "100%", overflowY: "auto" }}>
+      {/* Sub-nav */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        {[["overview","⊛ Overview"], ["devices","⬡ Devices"], ["vulnerabilities","⚠ Vulnerabilities"], ["settings","⚙ Settings"]].map(([k, l]) => sectionBtn(k, l))}
+      </div>
+
+      {/* ── OVERVIEW ── */}
+      {section === "overview" && stats && (
+        <div>
+          {/* Stat cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
+            {[
+              ["Total Scans",    stats.total_scans,   "#00ffcc"],
+              ["Devices Tracked",stats.total_devices, "#3B82F6"],
+              ["Vulnerabilities Found", stats.total_vulns, "#FF8C42"],
+              ["Avg Security Score", stats.avg_score, stats.avg_score >= 80 ? "#06D6A0" : stats.avg_score >= 50 ? "#FFD166" : "#FF3B3B"],
+            ].map(([label, value, color]) => (
+              <div key={label} style={{ background: "#ffffff06", border: "1px solid #ffffff10", borderRadius: 12, padding: "18px 20px" }}>
+                <div style={{ color: "#ffffff40", fontSize: 10, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>{label}</div>
+                <div style={{ color, fontSize: 36, fontWeight: 800, fontFamily: "monospace" }}>{value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Severity breakdown */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+            <div style={{ background: "#ffffff06", border: "1px solid #ffffff10", borderRadius: 12, padding: 18 }}>
+              <div style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>Vulnerability Breakdown</div>
+              {Object.entries(stats.severity_breakdown || {}).map(([sev, count]) => {
+                const cfg = SEVERITY_CONFIG[sev] || SEVERITY_CONFIG.low;
+                const total = Object.values(stats.severity_breakdown).reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                return (
+                  <div key={sev} style={{ marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ color: cfg.color, fontSize: 11, fontFamily: "monospace" }}>{cfg.label}</span>
+                      <span style={{ color: "#ffffff60", fontSize: 11, fontFamily: "monospace" }}>{count} ({pct}%)</span>
+                    </div>
+                    <div style={{ height: 4, background: "#ffffff08", borderRadius: 2 }}>
+                      <div style={{ height: "100%", width: `${pct}%`, background: cfg.color, borderRadius: 2, transition: "width 0.5s" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Score trend */}
+            <div style={{ background: "#ffffff06", border: "1px solid #ffffff10", borderRadius: 12, padding: 18 }}>
+              <div style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 14 }}>Score Trend (Last 10 Scans)</div>
+              {stats.score_trend?.length > 0 ? (
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 80 }}>
+                  {stats.score_trend.map((s, i) => {
+                    const color = s.score >= 80 ? "#06D6A0" : s.score >= 50 ? "#FFD166" : "#FF3B3B";
+                    return (
+                      <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                        <div style={{ fontSize: 9, color: "#ffffff40", fontFamily: "monospace" }}>{s.score}</div>
+                        <div style={{ width: "100%", background: color + "44", border: `1px solid ${color}66`, borderRadius: 3, height: `${s.score}%`, minHeight: 4, transition: "height 0.5s" }} />
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ color: "#ffffff30", fontFamily: "monospace", fontSize: 12, textAlign: "center", paddingTop: 20 }}>No scan data yet</div>
+              )}
+
+              {/* Most vulnerable device */}
+              {stats.most_vulnerable_device && (
+                <div style={{ marginTop: 14, padding: "10px 12px", background: "#FF8C4210", border: "1px solid #FF8C4230", borderRadius: 8 }}>
+                  <div style={{ color: "#FF8C42", fontSize: 10, fontFamily: "monospace", letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>Most Vulnerable Device</div>
+                  <div style={{ color: "#ffffffcc", fontSize: 12, fontFamily: "monospace" }}>{stats.most_vulnerable_device.device_ip}</div>
+                  <div style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace" }}>{stats.most_vulnerable_device.count} vulnerabilities found</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DEVICES ── */}
+      {section === "devices" && (
+        <div>
+          <div style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>
+            {devices.length} devices tracked in database
+          </div>
+          {devices.length === 0 ? (
+            <div style={{ color: "#ffffff30", fontFamily: "monospace", textAlign: "center", paddingTop: 60 }}>No devices tracked yet. Run a scan first.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {devices.map(d => {
+                const statusCfg = SEVERITY_CONFIG[d.last_status] || SEVERITY_CONFIG.safe;
+                const isDeleting = deletingDevice === d.mac;
+                return (
+                  <div key={d.mac} style={{ background: "#ffffff06", border: "1px solid #ffffff10", borderRadius: 12, padding: "16px 18px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <span style={{ fontSize: 22, color: statusCfg.color }}>{getDeviceIcon(d.type)}</span>
+                        <div>
+                          <div style={{ color: "#fff", fontSize: 13, fontWeight: 600, fontFamily: "monospace" }}>{d.type} <span style={{ color: "#ffffff40", fontWeight: 400 }}>— {d.vendor}</span></div>
+                          <div style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace" }}>{d.ip} · {d.mac}</div>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <VulnBadge severity={d.last_status} />
+                        <div style={{ textAlign: "right" }}>
+                          <div style={{ color: "#00ffcc", fontSize: 13, fontWeight: 700, fontFamily: "monospace" }}>{d.times_seen}×</div>
+                          <div style={{ color: "#ffffff30", fontSize: 10, fontFamily: "monospace" }}>seen</div>
+                        </div>
+                        {isDeleting ? (
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <button onClick={() => handleDeleteDevice(d.mac)} style={{ background: "#FF3B3B22", border: "1px solid #FF3B3B44", color: "#FF3B3B", borderRadius: 6, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>Delete</button>
+                            <button onClick={() => setDeletingDevice(null)} style={{ background: "#ffffff08", border: "1px solid #ffffff15", color: "#ffffff50", borderRadius: 6, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>Cancel</button>
+                          </div>
+                        ) : (
+                          <button onClick={() => setDeletingDevice(d.mac)} style={{ background: "transparent", border: "1px solid #ffffff15", color: "#ffffff30", borderRadius: 6, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>✕</button>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
+                      <span style={{ color: "#ffffff30", fontSize: 10, fontFamily: "monospace" }}>First seen: {new Date(d.first_seen).toLocaleDateString()}</span>
+                      <span style={{ color: "#ffffff30", fontSize: 10, fontFamily: "monospace" }}>Last seen: {new Date(d.last_seen).toLocaleDateString()}</span>
+                      <span style={{ color: "#ffffff30", fontSize: 10, fontFamily: "monospace" }}>Protocol: {d.protocol}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── VULNERABILITIES ── */}
+      {section === "vulnerabilities" && (
+        <div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase" }}>
+              {filteredVulns.length} vulnerability records
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              {["", "critical", "high", "medium", "low"].map(s => {
+                const cfg = s ? SEVERITY_CONFIG[s] : null;
+                return (
+                  <button key={s} onClick={() => setSeverityFilter(s)} style={{ background: severityFilter === s ? (cfg ? cfg.bg : "#ffffff12") : "transparent", border: `1px solid ${severityFilter === s ? (cfg ? cfg.color + "44" : "#ffffff30") : "#ffffff15"}`, color: cfg ? cfg.color : "#ffffff50", borderRadius: 6, padding: "4px 10px", fontSize: 10, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>
+                    {s ? s.toUpperCase() : "ALL"}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {filteredVulns.length === 0 ? (
+            <div style={{ color: "#ffffff30", fontFamily: "monospace", textAlign: "center", paddingTop: 60 }}>No vulnerabilities found.</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {filteredVulns.map((v, i) => (
+                <div key={i} style={{ background: "#ffffff06", border: "1px solid #ffffff0d", borderRadius: 10, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                  <VulnBadge severity={v.severity} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ color: "#ffffffcc", fontSize: 12, fontFamily: "monospace" }}>{v.name}</div>
+                    <div style={{ color: "#ffffff40", fontSize: 10, fontFamily: "monospace", marginTop: 2 }}>{v.vuln_id} · CVSS {v.cvss} · {v.device_ip}</div>
+                  </div>
+                  <div style={{ color: "#ffffff30", fontSize: 10, fontFamily: "monospace", textAlign: "right" }}>
+                    {new Date(v.detected_at).toLocaleDateString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── SETTINGS ── */}
+      {section === "settings" && (
+        <div>
+          <div style={{ color: "#ffffff50", fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Scanner Configuration</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {Object.entries(settings).map(([key, value]) => (
+              <div key={key} style={{ background: "#ffffff06", border: "1px solid #ffffff10", borderRadius: 10, padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div>
+                  <div style={{ color: "#00ffcc", fontSize: 12, fontFamily: "monospace", marginBottom: 2 }}>{key.replace(/_/g, " ").toUpperCase()}</div>
+                  {editSetting === key ? (
+                    <input
+                      value={editValue}
+                      onChange={e => setEditValue(e.target.value)}
+                      style={{ background: "#ffffff0a", border: "1px solid #00ffcc44", borderRadius: 4, padding: "4px 8px", color: "#fff", fontFamily: "monospace", fontSize: 12, outline: "none", width: 220 }}
+                      autoFocus
+                    />
+                  ) : (
+                    <div style={{ color: "#ffffffcc", fontSize: 13, fontFamily: "monospace" }}>{value}</div>
+                  )}
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {editSetting === key ? (
+                    <>
+                      <button onClick={() => saveSetting(key)} style={{ background: "#00ffcc18", border: "1px solid #00ffcc44", color: "#00ffcc", borderRadius: 6, padding: "5px 12px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>Save</button>
+                      <button onClick={() => setEditSetting(null)} style={{ background: "#ffffff08", border: "1px solid #ffffff15", color: "#ffffff50", borderRadius: 6, padding: "5px 12px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>Cancel</button>
+                    </>
+                  ) : (
+                    <button onClick={() => { setEditSetting(key); setEditValue(value); }} style={{ background: "#ffffff08", border: "1px solid #ffffff15", color: "#ffffff50", borderRadius: 6, padding: "5px 12px", fontSize: 11, cursor: "pointer", fontFamily: "monospace" }}>Edit</button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── ROOT APP ──────────────────────────────────────────────────────────────────
 export default function App() {
   const [phase, setPhase]               = useState("idle");
   const [scanStage, setScanStage]       = useState("");
@@ -331,61 +548,44 @@ export default function App() {
   const [activeTab, setActiveTab]       = useState("devices");
   const [apiOnline, setApiOnline]       = useState(null);
   const [historyKey, setHistoryKey]     = useState(0);
+  const [showDatabase, setShowDatabase] = useState(false);
   const pollRef = useRef(null);
 
   useEffect(() => {
-    fetch(`${API}/`)
-      .then(r => r.json())
-      .then(() => setApiOnline(true))
-      .catch(() => setApiOnline(false));
+    fetch(`${API}/`).then(r => r.json()).then(() => setApiOnline(true)).catch(() => setApiOnline(false));
   }, []);
 
   const goHome = () => {
     if (pollRef.current) clearInterval(pollRef.current);
-    setPhase("idle");
-    setResults(null);
-    setSelectedDevice(null);
-    setHistoryKey(k => k + 1);
+    setPhase("idle"); setResults(null); setSelectedDevice(null);
+    setShowDatabase(false); setHistoryKey(k => k + 1);
   };
 
   const startScan = async () => {
-    setPhase("scanning");
-    setScanProgress(0);
-    setScanStage("Initializing...");
-    setResults(null);
-    setSelectedDevice(null);
+    setPhase("scanning"); setScanProgress(0); setScanStage("Initializing...");
+    setResults(null); setSelectedDevice(null); setShowDatabase(false);
     try {
       const res = await fetch(`${API}/api/scan/start`, { method: "POST" });
       const { scan_id } = await res.json();
       pollRef.current = setInterval(async () => {
         const s = await fetch(`${API}/api/scan/status/${scan_id}`).then(r => r.json());
-        setScanStage(s.stage || "");
-        setScanProgress(s.progress || 0);
+        setScanStage(s.stage || ""); setScanProgress(s.progress || 0);
         if (s.status === "complete") {
           clearInterval(pollRef.current);
-          setResults(s.results);
-          setSelectedDevice(s.results.devices?.[0] || null);
-          setPhase("results");
-          setActiveTab("devices");
-          setHistoryKey(k => k + 1);
+          setResults(s.results); setSelectedDevice(s.results.devices?.[0] || null);
+          setPhase("results"); setActiveTab("devices"); setHistoryKey(k => k + 1);
         } else if (s.status === "error") {
-          clearInterval(pollRef.current);
-          setPhase("idle");
+          clearInterval(pollRef.current); setPhase("idle");
           alert("Scan failed: " + s.error);
         }
       }, 400);
-    } catch (e) {
-      setPhase("idle");
-      alert("Cannot reach backend. Is the API running on port 8000?");
-    }
+    } catch { setPhase("idle"); alert("Cannot reach backend. Is the API running on port 8000?"); }
   };
 
   const loadHistoryScan = async (scan_id) => {
     const data = await fetch(`${API}/api/scans/${scan_id}`).then(r => r.json());
-    setResults(data);
-    setSelectedDevice(data.devices?.[0] || null);
-    setPhase("results");
-    setActiveTab("devices");
+    setResults(data); setSelectedDevice(data.devices?.[0] || null);
+    setPhase("results"); setActiveTab("devices"); setShowDatabase(false);
   };
 
   const criticalCount = results?.severity_counts?.critical || 0;
@@ -400,7 +600,6 @@ export default function App() {
         ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:#ffffff20;border-radius:2px}
         *{box-sizing:border-box} html,body{margin:0;padding:0;width:100%;overflow-x:hidden}
       `}</style>
-
       <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(#00ffcc04 1px,transparent 1px),linear-gradient(90deg,#00ffcc04 1px,transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none", zIndex: 0 }} />
       <div style={{ position: "fixed", inset: 0, background: "radial-gradient(ellipse at 20% 20%,#00ffcc08,transparent 60%),radial-gradient(ellipse at 80% 80%,#0044ff06,transparent 60%)", pointerEvents: "none", zIndex: 0 }} />
 
@@ -409,10 +608,8 @@ export default function App() {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            {phase !== "idle" && (
-              <button onClick={goHome} style={{ background: "#ffffff08", border: "1px solid #ffffff18", color: "#ffffff70", borderRadius: 8, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1, transition: "all 0.2s" }}>
-                ← Home
-              </button>
+            {(phase !== "idle" || showDatabase) && (
+              <button onClick={goHome} style={{ background: "#ffffff08", border: "1px solid #ffffff18", color: "#ffffff70", borderRadius: 8, padding: "7px 16px", fontSize: 12, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>← Home</button>
             )}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 2 }}>
@@ -432,11 +629,14 @@ export default function App() {
             {phase === "results" && criticalCount + highCount > 0 && (
               <div style={{ display: "flex", gap: 8, marginRight: 8 }}>
                 {[["critical", criticalCount + " Critical"], ["high", highCount + " High"]].filter(([, c]) => parseInt(c) > 0).map(([sev, label]) => (
-                  <div key={sev} style={{ background: SEVERITY_CONFIG[sev].bg, border: `1px solid ${SEVERITY_CONFIG[sev].color}44`, borderRadius: 6, padding: "4px 12px", fontSize: 11, color: SEVERITY_CONFIG[sev].color }}>
-                    {label}
-                  </div>
+                  <div key={sev} style={{ background: SEVERITY_CONFIG[sev].bg, border: `1px solid ${SEVERITY_CONFIG[sev].color}44`, borderRadius: 6, padding: "4px 12px", fontSize: 11, color: SEVERITY_CONFIG[sev].color }}>{label}</div>
                 ))}
               </div>
+            )}
+            {phase === "idle" && !showDatabase && (
+              <button onClick={() => setShowDatabase(true)} style={{ background: "#ffffff08", border: "1px solid #ffffff18", color: "#ffffff60", borderRadius: 8, padding: "9px 18px", fontSize: 12, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>
+                ⊞ Database
+              </button>
             )}
             <button onClick={startScan} disabled={phase === "scanning"} style={{ background: phase === "idle" ? "#00ffcc" : "#00ffcc22", border: `1px solid ${phase === "idle" ? "#00ffcc" : "#00ffcc44"}`, color: phase === "idle" ? "#080c12" : "#00ffcc", borderRadius: 8, padding: "9px 20px", fontSize: 12, fontWeight: 800, cursor: phase === "scanning" ? "not-allowed" : "pointer", fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", transition: "all 0.2s", opacity: phase === "scanning" ? 0.7 : 1 }}>
               {phase === "idle" ? "▶ Run Scan" : phase === "scanning" ? "Scanning..." : "↺ Rescan"}
@@ -444,8 +644,17 @@ export default function App() {
           </div>
         </div>
 
+        {/* DATABASE */}
+        {showDatabase && (
+          <div style={{ animation: "fadeIn 0.4s ease" }}>
+            <div style={{ background: "#ffffff04", border: "1px solid #ffffff0d", borderRadius: 14, padding: 24, minHeight: "calc(100vh - 160px)" }}>
+              <DatabaseTab />
+            </div>
+          </div>
+        )}
+
         {/* IDLE */}
-        {phase === "idle" && (
+        {!showDatabase && phase === "idle" && (
           <div style={{ animation: "fadeIn 0.4s ease" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 260, gap: 20, marginBottom: 32 }}>
               <div style={{ width: 90, height: 90, border: "1px solid #00ffcc22", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, color: "#00ffcc33" }}>⊛</div>
@@ -463,7 +672,7 @@ export default function App() {
         {phase === "scanning" && <ScanningOverlay stage={scanStage} progress={scanProgress} />}
 
         {/* RESULTS */}
-        {phase === "results" && results && (
+        {!showDatabase && phase === "results" && results && (
           <div style={{ animation: "fadeIn 0.4s ease" }}>
             <div style={{ display: "flex", gap: 4, marginBottom: 18 }}>
               {[["devices", `⊞  Devices (${results.devices_found})`], ["report", "≡  Risk Report"], ["history", "⊕  History"]].map(([tab, label]) => (
@@ -473,33 +682,25 @@ export default function App() {
               ))}
               <div style={{ flex: 1, borderBottom: "1px solid #ffffff10" }} />
               <div style={{ display: "flex", alignItems: "center", paddingRight: 4, borderBottom: "1px solid #ffffff10" }}>
-                <span style={{ color: "#ffffff30", fontSize: 11, fontFamily: "monospace" }}>
-                  {results.total_vulnerabilities} vulns · {results.devices_found} devices · {new Date(results.scan_time).toLocaleTimeString()}
-                </span>
+                <span style={{ color: "#ffffff30", fontSize: 11, fontFamily: "monospace" }}>{results.total_vulnerabilities} vulns · {results.devices_found} devices · {new Date(results.scan_time).toLocaleTimeString()}</span>
               </div>
             </div>
 
             {activeTab === "devices" && (
               <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 16, height: "calc(100vh - 200px)" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, overflowY: "auto" }}>
-                  {results.devices.map((d, i) => (
-                    <DeviceCard key={i} device={d} selected={selectedDevice?.ip === d.ip} onClick={() => setSelectedDevice(d)} />
-                  ))}
+                  {results.devices.map((d, i) => <DeviceCard key={i} device={d} selected={selectedDevice?.ip === d.ip} onClick={() => setSelectedDevice(d)} />)}
                 </div>
                 <div style={{ background: "#ffffff04", border: "1px solid #ffffff0d", borderRadius: 14, padding: 20, overflowY: "auto" }}>
-                  {selectedDevice ? <DeviceDetail device={selectedDevice} /> : (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#ffffff20", fontSize: 13 }}>← Select a device</div>
-                  )}
+                  {selectedDevice ? <DeviceDetail device={selectedDevice} /> : <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#ffffff20", fontSize: 13 }}>← Select a device</div>}
                 </div>
               </div>
             )}
-
             {activeTab === "report" && (
               <div style={{ background: "#ffffff04", border: "1px solid #ffffff0d", borderRadius: 14, padding: 20, height: "calc(100vh - 200px)", overflowY: "auto" }}>
                 <RiskReport results={results} />
               </div>
             )}
-
             {activeTab === "history" && (
               <div style={{ background: "#ffffff04", border: "1px solid #ffffff0d", borderRadius: 14, padding: 20, height: "calc(100vh - 200px)", overflowY: "auto" }}>
                 <HistoryTab onLoad={loadHistoryScan} refreshKey={historyKey} />

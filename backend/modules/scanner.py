@@ -26,7 +26,7 @@ SCAN_STAGES = [
 ]
 
 
-async def run_full_scan(target: str, progress_cb: Callable) -> dict:
+async def run_scan(target: str, progress_cb: Callable) -> dict:
     """
     Full pipeline: discover → fingerprint → port scan → vuln match → report
     Returns a structured results dict.
