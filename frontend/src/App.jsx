@@ -376,11 +376,7 @@ export default function App() {
                 ))}
               </div>
             )}
-            {phase === "idle" && (
-              <button onClick={() =>} style={{ background: "#ffffff08", border: "1px solid #ffffff18", color: "#ffffff60", borderRadius: 8, padding: "9px 18px", fontSize: 12, cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}>
-                ⊞ Database
-              </button>
-            )}
+
             <button onClick={startScan} disabled={phase === "scanning"} style={{ background: phase === "idle" ? "#00ffcc" : "#00ffcc22", border: `1px solid ${phase === "idle" ? "#00ffcc" : "#00ffcc44"}`, color: phase === "idle" ? "#080c12" : "#00ffcc", borderRadius: 8, padding: "9px 20px", fontSize: 12, fontWeight: 800, cursor: phase === "scanning" ? "not-allowed" : "pointer", fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", transition: "all 0.2s", opacity: phase === "scanning" ? 0.7 : 1 }}>
               {phase === "idle" ? "▶ Run Scan" : phase === "scanning" ? "Scanning..." : "↺ Rescan"}
             </button>
