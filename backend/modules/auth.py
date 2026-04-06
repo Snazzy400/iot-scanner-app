@@ -1,21 +1,19 @@
 """
 auth.py — Authentication module for IoT Vulnerability Scanner
-Handles password hashing, JWT token creation and verification
 """
 
 import sqlite3
 import os
+import bcrypt
 from datetime import datetime, timedelta
-from passlib.context import CryptContext
 from jose import JWTError, jwt
 
 # ── Config ────────────────────────────────────────────────────────────────────
-SECRET_KEY  = "iot-scanner-secret-key-nasir-neu-2024-change-in-production"
-ALGORITHM   = "HS256"
+SECRET_KEY         = "iot-scanner-secret-key-nasir-neu-2024"
+ALGORITHM          = "HS256"
 TOKEN_EXPIRE_HOURS = 8
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "scans.db")
-pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ── DB Setup ──────────────────────────────────────────────────────────────────
@@ -30,10 +28,9 @@ def init_auth_db():
             created_at TEXT NOT NULL
         )
     """)
-    # Create default admin if no users exist
     count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
     if count == 0:
-        hashed = pwd_ctx.hash("admin123")
+        hashed = bcrypt.hashpw("admin123".encode(), bcrypt.gensalt()).decode()
         conn.execute(
             "INSERT INTO users (username, password, created_at) VALUES (?, ?, ?)",
             ("admin", hashed, datetime.utcnow().isoformat())
@@ -45,11 +42,11 @@ def init_auth_db():
 
 # ── Password ──────────────────────────────────────────────────────────────────
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_ctx.verify(plain, hashed)
+    return bcrypt.checkpw(plain.encode(), hashed.encode())
 
 
 def hash_password(plain: str) -> str:
-    return pwd_ctx.hash(plain)
+    return bcrypt.hashpw(plain.encode(), bcrypt.gensalt()).decode()
 
 
 # ── User lookup ───────────────────────────────────────────────────────────────
