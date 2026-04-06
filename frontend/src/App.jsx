@@ -63,7 +63,7 @@ function LoginPage({ onLogin }) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", width: "100%", background: "#080c12", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", position: "relative" }}>
+    <div style={{ minHeight: "100vh", width: "100vw", background: "#080c12", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", position: "relative", overflow: "hidden" }}>
       <style>{`
         @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
         @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -463,13 +463,13 @@ export default function App() {
   const highCount     = results?.severity_counts?.high     || 0;
 
   return (
-    <div style={{ minHeight: "100vh", width: "100%", background: "#080c12", color: "#fff", fontFamily: "monospace", position: "relative" }}>
+    <div style={{ minHeight: "100vh", width: "100vw", background: "#080c12", color: "#fff", fontFamily: "monospace", position: "relative", overflowX: "hidden" }}>
       <style>{`
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
         @keyframes spinR{from{transform:rotate(360deg)}to{transform:rotate(0)}}
         ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:#ffffff20;border-radius:2px}
-        *{box-sizing:border-box} html,body{margin:0;padding:0;width:100%;overflow-x:hidden}
+        *{box-sizing:border-box;margin:0;padding:0} html,body{margin:0;padding:0;width:100vw;max-width:100%;overflow-x:hidden}
       `}</style>
       <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(#00ffcc04 1px,transparent 1px),linear-gradient(90deg,#00ffcc04 1px,transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none", zIndex: 0 }} />
       <div style={{ position: "fixed", inset: 0, background: "radial-gradient(ellipse at 20% 20%,#00ffcc08,transparent 60%),radial-gradient(ellipse at 80% 80%,#0044ff06,transparent 60%)", pointerEvents: "none", zIndex: 0 }} />
