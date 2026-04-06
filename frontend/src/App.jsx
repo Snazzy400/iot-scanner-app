@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const API = " https://lbs-invention-correspondence-brilliant.trycloudflare.com ";
+const API = "https://wheels-tank-originally-industrial.trycloudflare.com";
 
 const SEVERITY_CONFIG = {
   critical: { color: "#FF3B3B", bg: "#FF3B3B18", label: "Critical", order: 0 },
