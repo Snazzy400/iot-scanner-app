@@ -1,78 +1,82 @@
 """
-vuln_matcher.py  –  Maps device fingerprint + open ports → known CVEs
-IoT-specific vulnerability knowledge base (aligned with project Chapter 2)
+vuln_matcher.py — Matches device profiles against the vulnerability knowledge base
 """
 
 from modules.vuln_db import VULNERABILITY_DB
 
 
-def match_vulnerabilities(device: dict) -> list[dict]:
+def match_vulnerabilities(device: dict) -> list:
     """
-    Given a fingerprinted device dict, return a list of matched vulnerabilities.
-    Matching logic:
-      1. Device-type rules  (e.g. all Smart Plugs get checked for UPnP CVE)
-      2. Protocol rules     (e.g. ZigBee replay, MQTT unencrypted)
-      3. Port-presence rules(e.g. port 23 open → Telnet enabled)
-      4. Firmware version rules
+    Match a device profile against vulnerability rules.
+    Only returns vulnerabilities where ALL conditions are satisfied.
     """
     matched = []
-    open_ports = {p["port"] for p in device.get("ports", [])}
-    device_type = device.get("type", "").lower()
-    protocol = device.get("protocol", "").lower()
-    vendor = device.get("vendor", "").lower()
-    firmware = device.get("firmware", "")
+    open_ports   = [p["port"] for p in device.get("ports", [])]
+    vendor       = device.get("vendor", "").lower()
+    device_type  = device.get("type", "").lower()
+    protocol     = device.get("protocol", "").lower()
+    firmware     = device.get("firmware", "Unknown")
 
-    for vuln in VULNERABILITY_DB:
-        if _matches(vuln, device_type, protocol, vendor, open_ports, firmware):
+    for rule in VULNERABILITY_DB:
+        conditions = rule.get("conditions", {})
+        match = True
+
+        # ── ports_open: ALL listed ports must be open ──────────────────
+        if "ports_open" in conditions:
+            if not any(p in open_ports for p in conditions["ports_open"]):
+                match = False
+
+        # ── ports_absent: listed ports must NOT be open ────────────────
+        if "ports_absent" in conditions and match:
+            if any(p in open_ports for p in conditions["ports_absent"]):
+                match = False
+
+        # ── vendors: device vendor must match ─────────────────────────
+        if "vendors" in conditions and match:
+            if not any(v.lower() in vendor for v in conditions["vendors"]):
+                match = False
+
+        # ── device_types: device type must match ──────────────────────
+        if "device_types" in conditions and match:
+            if not any(t.lower() in device_type for t in conditions["device_types"]):
+                match = False
+
+        # ── protocols: device protocol must match ─────────────────────
+        if "protocols" in conditions and match:
+            if not any(p.lower() in protocol for p in conditions["protocols"]):
+                match = False
+
+        # ── firmware_below: firmware version must be below threshold ───
+        if "firmware_below" in conditions and match:
+            if firmware == "Unknown":
+                match = False
+            else:
+                try:
+                    fw_parts    = [int(x) for x in firmware.split(".")[:2]]
+                    limit_parts = [int(x) for x in conditions["firmware_below"].split(".")[:2]]
+                    match = fw_parts < limit_parts
+                except Exception:
+                    match = False
+
+        if match:
             matched.append({
-                "id":       vuln["id"],
-                "name":     vuln["name"],
-                "severity": vuln["severity"],
-                "desc":     vuln["desc"],
-                "fix":      vuln["fix"],
-                "cvss":     vuln.get("cvss", "N/A"),
+                "id":       rule["id"],
+                "name":     rule["name"],
+                "severity": rule["severity"],
+                "cvss":     rule.get("cvss", "N/A"),
+                "desc":     rule["desc"],
+                "fix":      rule["fix"],
             })
 
     return matched
 
 
-def _matches(vuln, device_type, protocol, vendor, open_ports, firmware) -> bool:
-    rules = vuln.get("match", {})
-
-    # All rules in a match block must pass (AND logic)
-    if "device_types" in rules:
-        if not any(t in device_type for t in rules["device_types"]):
-            return False
-
-    if "protocols" in rules:
-        if not any(p in protocol for p in rules["protocols"]):
-            return False
-
-    if "vendors" in rules:
-        if not any(v in vendor for v in rules["vendors"]):
-            return False
-
-    if "ports_open" in rules:
-        if not any(p in open_ports for p in rules["ports_open"]):
-            return False
-
-    if "ports_absent" in rules:
-        # Flag if a SECURE port is absent (e.g. 443 absent means no HTTPS)
-        if any(p in open_ports for p in rules["ports_absent"]):
-            return False  # secure alternative IS present, skip
-
-    if "firmware_below" in rules:
-        if not _firmware_older_than(firmware, rules["firmware_below"]):
-            return False
-
-    return True
-
-
-def _firmware_older_than(current: str, threshold: str) -> bool:
-    """Simple version comparison. Returns True if current < threshold."""
-    try:
-        def parse(v):
-            return [int(x) for x in v.lstrip("v").split("-")[0].split(".") if x.isdigit()]
-        return parse(current) < parse(threshold)
-    except Exception:
-        return False
+def get_device_status(vulnerabilities: list) -> str:
+    """Return the highest severity level found."""
+    if not vulnerabilities:
+        return "safe"
+    order = ["critical", "high", "medium", "low"]
+    for level in order:
+        if any(v["severity"] == level for v in vulnerabilities):
+            return level
+    return "safe"
