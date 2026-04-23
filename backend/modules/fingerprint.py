@@ -12,6 +12,10 @@ MAC_VENDOR_DB = {
     "00:90:4A": {"vendor": "Zoom Telephonics (Router)", "type": "Home Router",     "protocol": "Wi-Fi"},
     "EE:D2:AB": {"vendor": "Android Device (Randomized MAC)", "type": "Smartphone", "protocol": "Wi-Fi"},
     "00:15:5D": {"vendor": "Microsoft Hyper-V",         "type": "Virtual Machine", "protocol": "Ethernet"},
+
+    # ── Real IoT Test Devices ──────────────────────────────────────────────
+    "24:86:02": {"vendor": "CozyLife (Tuya Platform)",  "type": "Smart Plug",      "protocol": "Wi-Fi"},
+    "00:50:C2": {"vendor": "QIACHIP (eWeLink Platform)","type": "Smart Bulb",      "protocol": "Wi-Fi"},
     "B8:27:EB": {"vendor": "Raspberry Pi Foundation", "type": "Smart Hub",      "protocol": "Wi-Fi"},
     "DC:A6:32": {"vendor": "Raspberry Pi Foundation", "type": "Smart Hub",      "protocol": "Wi-Fi"},
     "E4:5F:01": {"vendor": "Raspberry Pi Foundation", "type": "Smart Hub",      "protocol": "Wi-Fi"},
