@@ -131,7 +131,6 @@ function LoginPage({ onLogin }) {
           </button>
 
           <div style={{ color: "#ffffff20", fontSize: 10, textAlign: "center", marginTop: 16, letterSpacing: 1 }}>
-            Default: admin / admin123
           </div>
         </div>
       </div>
