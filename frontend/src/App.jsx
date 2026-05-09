@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const API = "https://bomb-visitor-mother-adjusted.trycloudflare.com ";
+const API = "https://threshold-rest-firmware-thinking.trycloudflare.com";
 
 const SEVERITY_CONFIG = {
   critical: { color: "#FF3B3B", bg: "#FF3B3B18", label: "Critical", order: 0 },
@@ -63,7 +63,7 @@ function LoginPage({ onLogin }) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", width: "100vw", background: "#425470", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", width: "100vw", background: "#141c28", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", position: "relative", overflow: "hidden" }}>
       <style>{`
         @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
         @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
